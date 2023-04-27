@@ -14,9 +14,9 @@ def init_model(input_shape, summary=True):
         16, (4, 4), 1, activation="relu", input_shape=input_shape))
     model.add(keras.layers.MaxPooling2D())
     
-    model.add(keras.layers.Conv2D(
-        32, (4,4), 1, activation="gelu"))
-    model.add(keras.layers.MaxPooling2D())
+    # model.add(keras.layers.Conv2D(
+    #     32, (4,4), 1, activation="gelu"))
+    # model.add(keras.layers.MaxPooling2D())
     
     # model.add(keras.layers.Conv2D(
     #     16, (3,3), 1, activation="relu"))
@@ -93,7 +93,7 @@ def retrieve_training_labels():
     Reads the train_labels.csv file to find the appropriate labels in the appropriate 
     order.
     """
-    return pandas.read_csv('train_labels.csv', delimiter=',', usecols=[1])
+    return pandas.read_csv('./train_labels.csv', delimiter=',', usecols=[1])
 
 
 def determine_smallest_dimensions(train_images):
