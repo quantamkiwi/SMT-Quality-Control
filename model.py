@@ -14,13 +14,12 @@ def init_model(input_shape, summary=True):
         16, (4, 4), 1, activation="relu", input_shape=input_shape))
     model.add(keras.layers.MaxPooling2D())
     
-    # model.add(keras.layers.Conv2D(
-    #     32, (4,4), 1, activation="gelu"))
-    # model.add(keras.layers.MaxPooling2D())
+    model.add(keras.layers.Conv2D(
+        32, (3, 3), 1, activation="relu"))
+    model.add(keras.layers.MaxPooling2D())
     
     # model.add(keras.layers.Conv2D(
     #     16, (3,3), 1, activation="relu"))
-
     # model.add(keras.layers.MaxPooling2D())
     
     model.add(keras.layers.Flatten())
@@ -55,7 +54,7 @@ def train_model(model, train_images, train_labels):
     # hist = model.fit(train_images, epochs=10, validation_data=train_labels, callbacks=[tensorboard_callback])
     train_images = np.array(train_images)
     train_labels = np.array(train_labels)
-    hist = model.fit(train_images, train_labels, epochs=20, verbose=1)
+    hist = model.fit(train_images, train_labels, epochs=25, verbose=1)
     
     return hist
     
@@ -156,8 +155,8 @@ def main():
     images = retrieve_training_images()
     train_images, input_shape = equalize_image_dimensions(images)
     train_labels = retrieve_training_labels()
-    train_images, test_images = seperate(train_images, 4)
-    train_labels, test_labels = seperate(train_labels["Pass"], 4)
+    train_images, test_images = seperate(train_images, 3)
+    train_labels, test_labels = seperate(train_labels["Pass"], 3)
     
     
     

@@ -13,7 +13,7 @@ def scale_for_screen(image):
     """ 
     Resize image to fit in screen.
     """
-    return cv2.resize(image, (int(image.shape[1]*0.3), int(image.shape[0]*0.3)))
+    return cv2.resize(image, (int(image.shape[1]*0.2), int(image.shape[0]*0.2)))
 
 
 def image_processing(image, dilation_iterations):
@@ -132,10 +132,10 @@ def mainBB():
     """
     Main function for this file.
     """
-    image = read_image('./Train Images/IMG_0108.jpg')
+    image = read_image('./Train Images/IMG_0113.jpg')
     # image = scale_for_screen(image)
-    processed_image = image_processing(image, 0)
-    imageBB = bounding_boxes(processed_image, image, write=False)
+    processed_image = image_processing(image, 18)
+    imageBB = bounding_boxes(processed_image, image, write=True)
     imageBB = scale_for_screen(imageBB)
     cv2.imshow('image', imageBB)
     processed_image = scale_for_screen(processed_image)
