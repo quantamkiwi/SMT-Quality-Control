@@ -20,7 +20,7 @@ import pandas
 import tensorflow as tf
 from tensorflow import keras
 
-
+# Change for training and testing the model at your own discretion.
 TEST_TRAIN_RATIO = 3
 
 
@@ -70,7 +70,10 @@ def train_model(model, train_images, train_labels):
     Trains the model with respect to the training images and labels.
     """
     tensorboard_callback = allocate_log_directory()
-    # hist = model.fit(train_images, epochs=10, validation_data=train_labels, callbacks=[tensorboard_callback])
+
+    # For saving the model
+    # hist = model.fit(train_images, epochs=25, validation_data=train_labels, callbacks=[tensorboard_callback])
+    
     train_images = np.array(train_images)
     train_labels = np.array(train_labels)
     hist = model.fit(train_images, train_labels, epochs=25, verbose=1)
@@ -82,15 +85,24 @@ def test_model(model, test_images, test_labels):
     """ 
     Evaluates the trained model with respect to the test images and labels.
     """
+
+    # Format arrays.
     test_images = np.array(test_images)
     test_labels = np.array(test_labels)
+
+    # Evaluate model.
     loss, accuracy, precision, recall = model.evaluate(test_images, test_labels, verbose=1)
+
+    # Calculate F1 score.
     f1 = 2 * ((precision * recall) / (precision + recall))
+
+    # Print results.
     print(f"Test loss: {loss:.4f}")
     print(f"Test accuracy: {accuracy:.4f}")
     print(f"Test precision: {precision}")
     print(f"Test recall: {recall}")
     print(f"Test f1-score: {f1}")
+
     return loss, accuracy, precision, recall, f1
 
 def retrieve_training_images():
@@ -177,6 +189,7 @@ def seperate(items, dilution):
     test = []
     i = 0
 
+    # Seperate data into test and train arrays.
     for item in items:
         if i % dilution == 0:
             test.append(item)
@@ -192,22 +205,28 @@ def predict(filename, model, input_shape, display=False):
     """
     from roi_identification import bounding_boxes, image_processing, scale_for_screen
 
+    # Get image.
     image = cv2.imread(filename)
 
+    # Process Image.
     dilation, diff_rg, norm_diff_rg = image_processing(image, dilation_iterations=18)
 
+    # Get regions of interest.
     imagebox, rois, dimensions = bounding_boxes(dilation, image, predict=True)
 
+    # Delete tiny regions of interest.
     rois, dimensions = delete_small_images(rois, dimensions)
 
-
+    # Resize all of the regions of interest to the training size.
     i = 0
     while i < (len(rois) - 1):
         rois[i] = cv2.resize(rois[i], (input_shape[1], input_shape[0])) / 255
         i += 1 
 
+    # Pop the last roi (its inconsequential).
     rois.pop(-1)
 
+    # For each roi make a prediction.
     predictions = []
     for roi in rois:
         roi = np.expand_dims(np.array(roi), axis=0)
@@ -228,6 +247,7 @@ def display_predictions(image, rois, predictions, dimensions):
     red = (0, 0, 255)
     green = (0, 255, 0)
 
+    # Draw boxes around each roi detailing the prediction.
     i = 0
     for prediction in predictions:
         if prediction > 0.5:
@@ -258,7 +278,7 @@ def display_predictions(image, rois, predictions, dimensions):
                         thickness=2)
         i += 1
     
-
+    # Scale the image for the screen (may need to be changed if too small).
     image = cv2.resize(image, (int(image.shape[1]*0.2), int(image.shape[0]*0.2)))
 
     cv2.imshow('Labelled predictions for image', image)
@@ -270,20 +290,30 @@ def main():
     """ 
     Main Function.
     """
-
+    # Get regions of interest.
     images = retrieve_training_images()
+
+    # Equalise roi dimensions.
     train_images, input_shape = equalize_image_dimensions(images)
+
+    # Get roi labels.
     train_labels = retrieve_training_labels()
+
+    # Split rois into testing and training arrays.
     train_images, test_images = seperate(train_images, TEST_TRAIN_RATIO)
     train_labels, test_labels = seperate(train_labels["Pass"], TEST_TRAIN_RATIO)
     
-    
-    
+    # Initialize model. 
     model = init_model(input_shape)
     
+    # Train model.
     hist, model = train_model(model, train_images, train_labels)
+
+    # Uncomment if testing the model.
     # loss, accuracy, precision, recall, f1 = test_model(model, test_images, test_labels)
     # print(hist)
-    predictions = predict('./Train Images/IMG_0099.jpg', model, input_shape, display=True)
+
+    # Predictions, comment if testing.
+    predictions = predict('./Train Images/IMG_0109x.jpg', model, input_shape, display=True)
 
 main()

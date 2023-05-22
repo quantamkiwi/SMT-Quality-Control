@@ -15,6 +15,7 @@ import numpy as np
 import os.path
 
 
+# Calibrate this value for your image.
 DILATION_ITERATIONS = 18
 
 
@@ -59,13 +60,18 @@ def bounding_boxes(processed_image, image, write=False, predict=False):
     """ 
     Compute the Regions of Interest and surround then with bounding boxes.
     """
+
+    # Use Suzuki and Abe's algorithm to get contours.
     cnts = cv2.findContours(processed_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+
+    # Iterate through files to find latest number.
     roi_number = find_latest_roi_number()
 
     rois = []
     dimensions = []
 
+    # Draw regions of interest.
     for c in cnts:
         x,y,w,h = cv2.boundingRect(c)
         if w > 12 and h > 12:
@@ -74,6 +80,7 @@ def bounding_boxes(processed_image, image, write=False, predict=False):
             w += 6
             h += 6
             
+            # If write, write rois to files.
             if write:
                 roi = image[y:y+h, x:x+w]
                 classification = ask_user_roi_classification(roi)
@@ -82,10 +89,14 @@ def bounding_boxes(processed_image, image, write=False, predict=False):
                     write_label_to_csv(roi_number, classification)
                     roi_number += 1
                     cv2.rectangle(image, (x, y), (x + w, y + h), (36,255,12), 2)
+
+            # If predict, get the rois and dimensions and then return them.
             elif predict:
                 roi = image[y:y+h, x:x+w]
                 rois.append(roi)
                 dimensions.append([(x, y), (x + w, y + h)])
+
+            # If neither, return the image with the boxes drawn.
             else:
                 cv2.rectangle(image, (x, y), (x + w, y + h), (36,255,12), 2)
     if predict:
@@ -102,17 +113,22 @@ def ask_user_roi_classification(roi):
     """
     
     if roi.shape[0] > 0 and roi.shape[1] > 0: # check if roi has a valid size
+
+        # Create the window.
         title = f'roi: {roi.shape}'
         cv2.namedWindow(title, cv2.WINDOW_NORMAL)
         cv2.setWindowTitle(title, f'Press Q then Enter classification in Python Shell {title}')
         cv2.resizeWindow(title, 800, 600)
         cv2.imshow(title, roi)
+
+        # Wait for a response in the terminal then close the window.
         while True:
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
         cv2.destroyWindow(title)
-            
+        
+        # Save classification.
         try:
             classification = int(input("Is this image N/A (0), correct soldering (1) or a Defect (2): "))
         except Exception as e:
@@ -145,6 +161,7 @@ def find_latest_roi_number():
     """
     roi_number = 0
     
+    # Iterate through the files to check what roi the database is currently up to.
     while os.path.isfile('./Train Images/regions of interest/ROI_{}.png'.format(roi_number)):
         roi_number += 1 
     return roi_number
@@ -154,19 +171,22 @@ def mainBB():
     """
     Main function for this file.
     """
-    image = read_image('./Train Images/IMG_0123.jpg')
+    image = read_image('./report_images/IMG_0109x.jpg')
+
     # image = scale_for_screen(image)
+
     processed_image, diff_rg, norm_diff_rg = image_processing(image, DILATION_ITERATIONS)
     imageBB = bounding_boxes(processed_image, image, write=False)
     imageBB = scale_for_screen(imageBB)
+
     # cv2.imshow('image', image)
     # cv2.imshow('redgreen', diff_rg)
     # cv2.imshow('thresh', norm_diff_rg)
-    
     # processed_image = scale_for_screen(processed_image)
+
     cv2.imshow('dilated', processed_image)
     cv2.imshow('imageBB', imageBB)
     cv2.waitKey() 
 
 
-    
+mainBB()
