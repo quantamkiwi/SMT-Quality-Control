@@ -118,6 +118,21 @@ def retrieve_training_labels():
     return pandas.read_csv('./train_labels.csv', delimiter=',', usecols=[1])
 
 
+def delete_small_images(images, dimensions):
+    """ 
+    Goes through all of the regions of interest and eliminates the smallest ones 
+    from the array. 
+    """
+    i = 0
+    for image in images: 
+        if image.shape[0] < 10 or image.shape[1] < 10:
+            images.pop(i)
+            dimensions.pop(i)
+        i += 1
+    return images, dimensions
+
+
+
 def determine_smallest_dimensions(train_images):
     """ 
     Iterates through images and returns the smallest height and width dimensions found.
@@ -148,6 +163,7 @@ def equalize_image_dimensions(train_images):
     while i < len(train_images):
         train_images[i] = cv2.resize(train_images[i], (min_height, min_width)) / 255
         i += 1 
+    
     
     return train_images, (min_width, min_height, 3)
 
@@ -182,11 +198,15 @@ def predict(filename, model, input_shape, display=False):
 
     imagebox, rois, dimensions = bounding_boxes(dilation, image, predict=True)
 
+    rois, dimensions = delete_small_images(rois, dimensions)
+
+
     i = 0
-    while i < len(rois):
-        # if rois[i] is not None and rois[i].shape[0] > input_shape[1] and rois[i].shape[1] > input_shape[0]:
+    while i < (len(rois) - 1):
         rois[i] = cv2.resize(rois[i], (input_shape[1], input_shape[0])) / 255
         i += 1 
+
+    rois.pop(-1)
 
     predictions = []
     for roi in rois:
@@ -237,6 +257,10 @@ def display_predictions(image, rois, predictions, dimensions):
                         red, 
                         thickness=2)
         i += 1
+    
+
+    image = cv2.resize(image, (int(image.shape[1]*0.2), int(image.shape[0]*0.2)))
+
     cv2.imshow('Labelled predictions for image', image)
     cv2.waitKey()
     
@@ -260,6 +284,6 @@ def main():
     hist, model = train_model(model, train_images, train_labels)
     # loss, accuracy, precision, recall, f1 = test_model(model, test_images, test_labels)
     # print(hist)
-    predictions = predict('./Train Images/IMG_0096.jpg', model, input_shape, display=True)
+    predictions = predict('./Train Images/IMG_0099.jpg', model, input_shape, display=True)
 
 main()

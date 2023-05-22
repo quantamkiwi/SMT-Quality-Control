@@ -15,7 +15,7 @@ import numpy as np
 import os.path
 
 
-DILATION_ITERATIONS = 2
+DILATION_ITERATIONS = 18
 
 
 def read_image(filename):
