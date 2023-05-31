@@ -16,7 +16,7 @@ import os.path
 
 
 # Calibrate this value for your image.
-DILATION_ITERATIONS = 18
+DILATION_ITERATIONS = 25
 
 
 def read_image(filename):
@@ -189,4 +189,4 @@ def mainBB():
     cv2.waitKey() 
 
 
-mainBB()
+

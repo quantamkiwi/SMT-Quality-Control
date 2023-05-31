@@ -39,3 +39,9 @@ This file classifies regions of interest on an image as soldered or not. The `ma
 - Neural Network does not currently save. Must train before predicting.
 - CNN architecture used currently is shown in a diagram saved as `CNN.png`.
 - Images are in the `Train Images` folder. However, the simplest example is at `report_images/IMG0109x.jpg`.
+
+## Requirements 
+- TensorFlow
+- OpenCV
+- NumPy
+- Pandas

@@ -220,6 +220,7 @@ def predict(filename, model, input_shape, display=False):
     # Resize all of the regions of interest to the training size.
     i = 0
     while i < (len(rois) - 1):
+    # while i < (len(rois)):
         rois[i] = cv2.resize(rois[i], (input_shape[1], input_shape[0])) / 255
         i += 1 
 
@@ -314,6 +315,8 @@ def main():
     # print(hist)
 
     # Predictions, comment if testing.
-    predictions = predict('./Train Images/IMG_0109x.jpg', model, input_shape, display=True)
+    predictions = predict('./Train Images/IMG_0109.jpg', model, input_shape, display=True)
 
 main()
+
+# 
